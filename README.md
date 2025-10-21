@@ -1,58 +1,49 @@
 # Vehicle Data Chatbot
 
-A React + TypeScript chatbot application that provides intelligent vehicle data analysis through a modern web interface. The chatbot can process vehicle telemetry queries, fetch real-time data from racing APIs, and provide statistical analysis with a beautiful light/dark mode interface.
+A modern React + TypeScript chatbot that answers telemetry questions by generating and running Pandas scripts on live JSON data from vehicle sensors.
 
-## 🚀 Features
+## Purpose
 
-- **Intelligent Query Processing**: Uses OpenRouter AI to classify and process vehicle data queries
-- **Real-time Data Fetching**: Fetches live vehicle data from racing telemetry APIs
-- **Light/Dark Mode**: Toggle between light and dark themes with persistent preferences
-- **Error Handling**: Comprehensive error logging and user-friendly error messages
-- **Responsive Design**: Modern UI built with Tailwind CSS
-- **TypeScript**: Full type safety and excellent developer experience
-- **Go Backend**: Lightweight backend for error logging and API management
+This chatbot provides an intelligent interface for querying vehicle telemetry data. Users can ask natural language questions about vehicle performance metrics, and the system will:
 
-## 🛠 Tech Stack
+1. Classify whether the query is vehicle-data related
+2. Fetch live data from the vehicle API
+3. Generate custom Pandas scripts using AI
+4. Execute the scripts to compute requested metrics
+5. Return formatted results to the user
 
-### Frontend
-- **React 19** - Modern React with hooks
-- **TypeScript** - Type-safe JavaScript
-- **Tailwind CSS** - Utility-first CSS framework
-- **Vite** - Fast build tool and dev server
-- **OpenRouter** - AI integration for query classification
+## Tech Stack
 
-### Backend
-- **Go** - High-performance backend language
-- **Gorilla Mux** - HTTP router and URL matcher
-- **CORS** - Cross-origin resource sharing support
+- **Frontend**: React + TypeScript + Tailwind CSS + Vite
+- **Backend**: FastAPI + Pandas + HTTPX
+- **AI Integration**: OpenRouter (intent detection + code generation)
+- **Data Source**: Live vehicle telemetry API
 
-## 📦 Installation & Setup
+## Features
+
+- 🎨 **Modern UI**: Clean, responsive chat interface with Tailwind CSS
+- 🌙 **Dark Theme**: App runs in dark mode by default (no toggle)
+- 🤖 **AI-Powered**: Uses OpenRouter for query classification and Pandas script generation
+- 📊 **Live Data**: Fetches real-time vehicle telemetry data
+- 🔄 **Real-time Processing**: Generates and executes custom data analysis scripts
+- 📝 **Error Logging**: Comprehensive error tracking and reporting
+- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
+
+## How to Run
 
 ### Prerequisites
+
 - Node.js 18+ and npm
-- Go 1.21+
-- OpenRouter API key (optional, for AI classification)
+- Python 3.8+ (tested with Python 3.13)
+- OpenRouter API key
+
+**Note:** For Python 3.13 users, the project uses `requirements-minimal.txt` to ensure compatibility with the latest Python version.
 
 ### Frontend Setup
 
-1. Navigate to the frontend directory:
 ```bash
 cd frontend
-```
-
-2. Install dependencies:
-```bash
 npm install
-```
-
-3. Create environment file (optional):
-```bash
-# Create .env file for OpenRouter API key
-echo "VITE_OPENROUTER_API_KEY=your_api_key_here" > .env
-```
-
-4. Start the development server:
-```bash
 npm run dev
 ```
 
@@ -60,193 +51,155 @@ The frontend will be available at `http://localhost:5173`
 
 ### Backend Setup
 
-1. Navigate to the backend directory:
+1. **Install dependencies:**
 ```bash
 cd backend
+pip install -r requirements-minimal.txt
 ```
 
-2. Initialize Go modules and install dependencies:
+2. **Configure environment:**
 ```bash
-go mod tidy
+cp env.example .env
+# Edit .env and add your OpenRouter API key
 ```
 
-3. Run the backend server:
+3. **Run the server:**
 ```bash
-go run main.go
+uvicorn main:app --reload
 ```
 
-The backend will be available at `http://localhost:8080`
+The backend API will be available at `http://localhost:8000`
 
-## 🤖 How the Chatbot Works
+## Workflow
 
-### Query Processing Flow
+1. **User submits a query** → Frontend sends message to FastAPI backend
+2. **Query classification** → OpenRouter determines if it's vehicle-data related
+3. **If valid:**
+   - FastAPI fetches JSON data from vehicle API
+   - OpenRouter generates custom Pandas script
+   - Script executes securely in Python
+   - Computed result returned to frontend
+4. **If invalid:** Returns polite fallback response
 
-1. **User Input**: User types a query in the chat interface
-2. **AI Classification**: Query is sent to OpenRouter AI to classify as:
-   - `vehicle_data`: Queries about speed, telemetry, or vehicle performance
-   - `unrelated`: Any other type of query
-3. **Data Fetching**: For vehicle data queries, the system fetches real-time data from the racing API
-4. **Analysis**: Data is processed to calculate statistics (average, min, max, etc.)
-5. **Response**: Formatted response is displayed to the user
+## Error Logging
 
-### API Integration
+The system includes comprehensive error logging:
 
-#### Vehicle Data API
-- **Endpoint**: `https://mapache.gauchoracing.com/api/query/signals`
-- **Parameters**: 
-  - `vehicle_id=gr24-main`
-  - `trip_id=4`
-  - `signals=mobile_speed`
-  - `token=01b3939d-678f-44ac-93ff-0d54e09ba3d6`
-- **Response**: JSON containing speed data and timestamps
+- Frontend errors are automatically sent to the FastAPI `/log` endpoint
+- Backend errors are logged with full stack traces
+- All errors include timestamp, user agent, and context information
 
-#### OpenRouter AI
-- **Purpose**: Query classification and intelligent processing
-- **Model**: GPT-3.5-turbo
-- **Fallback**: Keyword-based classification if API key is not provided
+## Theme
 
-#### Backend Error Logging
-- **Endpoint**: `POST /api/log-error`
-- **Purpose**: Log errors for debugging and monitoring
-- **Data**: Error message, original query, and timestamp
+- The UI is dark-only. There is no light/dark toggle.
+- Tailwind `dark:` utilities are used with class-based dark mode.
 
-### Error Handling
+## Example Usage
 
-The application includes comprehensive error handling:
-
-1. **API Failures**: If the vehicle data API fails, errors are logged to the backend
-2. **Network Issues**: Graceful handling of network timeouts and connection errors
-3. **AI Classification**: Fallback to keyword-based classification if OpenRouter is unavailable
-4. **User Feedback**: Clear error messages displayed to users
-
-## 🎨 UI/UX Features
-
-### Light/Dark Mode
-- Toggle button in the header
-- Persistent theme preference using localStorage
-- System preference detection
-- Smooth transitions between themes
-
-### Chat Interface
-- Clean, modern chat UI
-- Message timestamps
-- Loading indicators
-- Auto-scroll to latest messages
-- Responsive design for all screen sizes
-
-### Welcome Screen
-- Helpful introduction when no messages are present
-- Example queries to guide users
-- Vehicle emoji and branding
-
-## 📝 Example Usage
-
-### Sample Queries
-
-**Vehicle Data Queries:**
+### Valid Queries (Vehicle Data)
 - "Give me the averages of the mobile speed"
-- "What's the vehicle speed data?"
-- "Show me the mobile speed statistics"
-- "Analyze the speed performance"
+- "What's the maximum acceleration during the trip?"
+- "Show me the fuel consumption data"
+- "Calculate the average RPM for this session"
 
-**Unrelated Queries:**
-- "What's the weather today?"
+**Response:** "The average mobile speed for trip 4 is 45.6 km/h."
+
+### Invalid Queries (Non-Vehicle Data)
 - "Tell me a joke"
+- "What's the weather like?"
 - "How do I cook pasta?"
 
-### Expected Responses
+**Response:** "Sorry, I can't help you with that."
 
-**For Vehicle Data:**
-```
-Here's the mobile speed data analysis:
+## API Endpoints
 
-📊 Statistics:
-- Average Speed: 45.67 units
-- Maximum Speed: 78.90 units
-- Minimum Speed: 12.34 units
-- Total Data Points: 150
+### POST `/query`
+Handles user messages and processes vehicle data queries.
 
-📈 Speed Values:
-1. 45.23
-2. 47.89
-3. 43.12
-... and 147 more values
+**Request:**
+```json
+{
+  "message": "Give me the averages of the mobile speed"
+}
 ```
 
-**For Unrelated Queries:**
-```
-Sorry, I can't help you with that. I can only assist with vehicle data queries.
-```
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Create a `.env` file in the frontend directory:
-
-```env
-# Optional: OpenRouter API key for AI classification
-VITE_OPENROUTER_API_KEY=your_openrouter_api_key_here
+**Response:**
+```json
+{
+  "success": true,
+  "message": "The average mobile speed for trip 4 is 45.6 km/h.",
+  "data": {
+    "script": "import pandas as pd\n# ... generated script"
+  }
+}
 ```
 
-### Backend Configuration
+### POST `/log`
+Receives and stores frontend error reports.
 
-The backend can be configured using environment variables:
-
-```bash
-# Port (default: 8080)
-export PORT=8080
+**Request:**
+```json
+{
+  "error": "Network request failed",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "userAgent": "Mozilla/5.0...",
+  "url": "http://localhost:5173"
+}
 ```
 
-## 🚀 Deployment
+### GET `/health`
+Health check endpoint for monitoring.
 
-### Frontend Deployment
-```bash
-cd frontend
-npm run build
-# Deploy the 'dist' folder to your hosting service
-```
-
-### Backend Deployment
-```bash
-cd backend
-go build -o chatbot-backend main.go
-# Deploy the binary to your server
-```
-
-## 🧪 Development
-
-### Running in Development Mode
-
-1. Start the backend:
-```bash
-cd backend && go run main.go
-```
-
-2. Start the frontend (in a new terminal):
-```bash
-cd frontend && npm run dev
-```
+## Development
 
 ### Project Structure
 
 ```
-Query/
 ├── frontend/
 │   ├── src/
-│   │   ├── components/     # React components
-│   │   ├── contexts/       # React contexts (theme)
-│   │   ├── services/       # API services
-│   │   ├── types/          # TypeScript interfaces
-│   │   └── ...
+│   │   ├── components/          # React components
+│   │   │   ├── ChatWindow.tsx
+│   │   │   ├── MessageBubble.tsx
+│   │   │   └── InputBox.tsx
+│   │   ├── contexts/            # (removed)
+│   │   ├── services/            # API services
+│   │   │   └── api.ts
+│   │   ├── types/               # TypeScript types
+│   │   │   └── chatbot.ts
+│   │   └── App.tsx
 │   └── package.json
 ├── backend/
-│   ├── main.go            # Go backend server
-│   └── go.mod             # Go dependencies
+│   ├── main.py                  # FastAPI application
+│   ├── requirements.txt         # Python dependencies
+│   └── env.example             # Environment variables template
 └── README.md
 ```
 
-## 🤝 Contributing
+### Key Components
+
+- **ChatWindow**: Main chat interface container
+- **MessageBubble**: Individual message display component
+- **InputBox**: Message input with send functionality
+
+## Configuration
+
+### Environment Variables
+
+Create a `.env` file in the backend directory:
+
+```env
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+```
+
+### API Configuration
+
+The vehicle data API is configured with:
+- **URL**: `https://mapache.gauchoracing.com/api/query/signals`
+- **Vehicle ID**: `gr24-main`
+- **Trip ID**: `4`
+- **Default Signal**: `mobile_speed`
+
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -254,17 +207,6 @@ Query/
 4. Test thoroughly
 5. Submit a pull request
 
-## 📄 License
+## License
 
-This project is open source and available under the MIT License.
-
-## 🆘 Support
-
-If you encounter any issues:
-
-1. Check the browser console for errors
-2. Verify the backend is running on port 8080
-3. Ensure your OpenRouter API key is valid (if using AI features)
-4. Check the network tab for failed API requests
-
-For additional support, please open an issue in the repository.
+This project is licensed under the MIT License.

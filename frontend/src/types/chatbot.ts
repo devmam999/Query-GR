@@ -6,35 +6,32 @@ export interface Message {
   isLoading?: boolean;
 }
 
-export interface VehicleDataResponse {
+export interface ChatResponse {
   success: boolean;
-  data?: {
-    signals: {
-      mobile_speed: number[];
-    };
-    timestamps: number[];
-  };
+  message: string;
+  data?: any;
   error?: string;
 }
 
-export interface ErrorLogRequest {
+export interface LogRequest {
   error: string;
-  query: string;
   timestamp: string;
+  userAgent: string;
+  url: string;
 }
 
-export interface OpenRouterResponse {
-  choices: Array<{
-    message: {
-      content: string;
-    };
-  }>;
+
+export interface ChatWindowProps {
+  className?: string;
 }
 
-export interface ChatbotState {
-  messages: Message[];
-  isLoading: boolean;
-  isDarkMode: boolean;
+export interface MessageBubbleProps {
+  message: Message;
 }
 
-export type QueryType = 'vehicle_data' | 'unrelated';
+
+export interface InputBoxProps {
+  onSendMessage: (message: string) => void;
+  disabled?: boolean;
+  placeholder?: string;
+}

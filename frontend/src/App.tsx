@@ -1,16 +1,21 @@
-import { type FC } from 'react';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { Chatbot } from './components/Chatbot';
+// Theme removed; default dark mode enforced
+import ChatWindow from './components/ChatWindow';
 import './App.css';
 
-const App: FC = () => {
+function App() {
   return (
-    <ThemeProvider>
-      <div className="h-screen bg-gray-50 dark:bg-gray-900">
-        <Chatbot />
-      </div>
-    </ThemeProvider>
+    <DarkRoot>
+      <ChatWindow />
+    </DarkRoot>
   );
-};
+}
 
 export default App;
+
+function DarkRoot({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-gray-900 text-gray-100">
+      {children}
+    </div>
+  );
+}

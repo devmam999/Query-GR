@@ -16,14 +16,14 @@ This chatbot provides an intelligent interface for querying vehicle telemetry da
 
 - **Frontend**: React + TypeScript + Tailwind CSS + Vite
 - **Backend**: FastAPI + Pandas + HTTPX
-- **AI Integration**: OpenRouter (intent detection + code generation)
+- **AI Integration**: Gemini (intent detection + code generation)
 - **Data Source**: Live vehicle telemetry API
 
 ## Features
 
 - 🎨 **Modern UI**: Clean, responsive chat interface with Tailwind CSS
 - 🌙 **Dark Theme**: App runs in dark mode by default (no toggle)
-- 🤖 **AI-Powered**: Uses OpenRouter for query classification and Pandas script generation
+- 🤖 **AI-Powered**: Uses Gemini for query classification and Pandas script generation
 - 📊 **Live Data**: Fetches real-time vehicle telemetry data
 - 🔄 **Real-time Processing**: Generates and executes custom data analysis scripts
 - 📝 **Error Logging**: Comprehensive error tracking and reporting
@@ -35,7 +35,7 @@ This chatbot provides an intelligent interface for querying vehicle telemetry da
 
 - Node.js 18+ and npm
 - Python 3.8+ (tested with Python 3.13)
-- OpenRouter API key
+- Gemini API key
 
 **Note:** For Python 3.13 users, the project uses `requirements-minimal.txt` to ensure compatibility with the latest Python version.
 
@@ -60,7 +60,7 @@ pip install -r requirements-minimal.txt
 2. **Configure environment:**
 ```bash
 cp env.example .env
-# Edit .env and add your OpenRouter API key
+# Edit .env and add your GEMINI API key (and optional settings below)
 ```
 
 3. **Run the server:**
@@ -73,11 +73,9 @@ The backend API will be available at `http://localhost:8000`
 ## Workflow
 
 1. **User submits a query** → Frontend sends message to FastAPI backend
-2. **Query classification** → OpenRouter determines if it's vehicle-data related
+2. **Query classification & script gen** → Gemini creates a Pandas script
 3. **If valid:**
-   - FastAPI fetches JSON data from vehicle API
-   - OpenRouter generates custom Pandas script
-   - Script executes securely in Python
+   - Script executes securely in Python and fetches JSON itself via an execution helper
    - Computed result returned to frontend
 4. **If invalid:** Returns polite fallback response
 
@@ -188,8 +186,31 @@ Health check endpoint for monitoring.
 Create a `.env` file in the backend directory:
 
 ```env
-OPENROUTER_API_KEY=your_openrouter_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
+# Optional tuning (with defaults shown)
+# GEMINI_MODEL=gemini-1.5-flash
+# GEMINI_TIMEOUT=60
+# GEMINI_MAX_RETRIES=2
+# GEMINI_RETRY_BACKOFF=1.0
+# DEBUG_ANALYSIS=false
+# GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1
 ```
+
+### AI Configuration and Behavior
+
+- The backend uses Gemini to generate a Pandas script tailored to each query.
+- The script is required to: fetch the JSON, robustly parse shapes like `data.data`, compute the asked metric(s), and both `print(result)` and call `set_result(result)`.
+- The executor injects a helper `http_get(url)` that logs the exact URL the script calls and returns a real response object (so scripts can do `resp.raise_for_status()` and `resp.json()`).
+- The backend enforces the exact data URL and logs it, enabling auditing of requests.
+- Transient errors are handled with retries and exponential backoff (configurable via env above). Timeouts are also adjustable.
+
+### Advanced Queries Supported
+
+- Aggregations: average/mean, min, max, median, percentiles
+- Ranking: top N / bottom N mobile_speed rows
+- Comparisons: compute and compare metrics across trips/signals
+
+Results are returned as a single line of text to the frontend; the executed script and optional debug info are included in the response data.
 
 ### API Configuration
 

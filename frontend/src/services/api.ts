@@ -1,8 +1,11 @@
 import type { ChatResponse, LogRequest } from '../types/chatbot';
 
 const API_BASE_URL = 'http://localhost:8000';
+const DEFAULT_TIMEOUT_MS = 20000; // 20s client-side timeout
 
-export const sendMessage = async (message: string): Promise<ChatResponse> => {
+export const sendMessage = async (message: string, timeoutMs: number = DEFAULT_TIMEOUT_MS): Promise<ChatResponse> => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(`${API_BASE_URL}/query`, {
       method: 'POST',
@@ -10,6 +13,7 @@ export const sendMessage = async (message: string): Promise<ChatResponse> => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ message }),
+      signal: controller.signal,
     });
 
     if (!response.ok) {
@@ -17,9 +21,14 @@ export const sendMessage = async (message: string): Promise<ChatResponse> => {
     }
 
     return await response.json();
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('Request timed out');
+    }
     console.error('Error sending message:', error);
     throw error;
+  } finally {
+    clearTimeout(timer);
   }
 };
 

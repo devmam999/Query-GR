@@ -1,22 +1,22 @@
-import { useState, type KeyboardEvent } from 'react';
-import type { InputBoxProps } from '../types/chatbot';
+import { useState, type KeyboardEvent } from "react";
+import type { InputBoxProps } from "../types/chatbot";
 
-const InputBox = ({ 
-  onSendMessage, 
-  disabled = false, 
-  placeholder = "Ask about vehicle data..." 
+const InputBox = ({
+  onSendMessage,
+  disabled = false,
+  placeholder = "Ask about vehicle data...",
 }: InputBoxProps) => {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   const handleSend = () => {
     if (message.trim() && !disabled) {
       onSendMessage(message.trim());
-      setMessage('');
+      setMessage("");
     }
   };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -31,7 +31,7 @@ const InputBox = ({
         onKeyPress={handleKeyPress}
         placeholder={placeholder}
         disabled={disabled}
-        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-black placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
       />
       <button
         onClick={handleSend}
